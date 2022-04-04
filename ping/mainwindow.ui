@@ -217,54 +217,6 @@
  <resources/>
  <connections>
   <connection>
-   <sender>add_ip_button</sender>
-   <signal>pressed()</signal>
-   <receiver>lineEdit_add_ip</receiver>
-   <slot>selectAll()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>917</x>
-     <y>83</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>581</x>
-     <y>91</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>add_ip_button</sender>
-   <signal>pressed()</signal>
-   <receiver>lineEdit_add_ip</receiver>
-   <slot>cut()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>948</x>
-     <y>86</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>547</x>
-     <y>92</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>add_ip_button</sender>
-   <signal>released()</signal>
-   <receiver>textEdit_ping_ip</receiver>
-   <slot>paste()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>892</x>
-     <y>87</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>412</x>
-     <y>228</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>remove_ip_button</sender>
    <signal>clicked()</signal>
    <receiver>textEdit_ping_ip</receiver>
@@ -293,38 +245,6 @@
     <hint type="destinationlabel">
      <x>510</x>
      <y>92</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ping_button</sender>
-   <signal>pressed()</signal>
-   <receiver>textEdit_ping_ip</receiver>
-   <slot>selectAll()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>525</x>
-     <y>729</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>257</x>
-     <y>345</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>ping_button</sender>
-   <signal>released()</signal>
-   <receiver>textEdit_ping_ip</receiver>
-   <slot>cut()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>672</x>
-     <y>730</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>441</x>
-     <y>606</y>
     </hint>
    </hints>
   </connection>
