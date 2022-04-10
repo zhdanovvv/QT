@@ -5,6 +5,7 @@
 #include <QUdpSocket>
 #include <QHostInfo>
 #include <QList>
+#include <QStringList>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -23,9 +24,10 @@ private slots:
     void WriteFile();
     void ReadFile();
     void Add_ip_intext_edit();
+
 private:
     Ui::MainWindow *ui;
-    QList<QString> list_ip;
+    QStringList list_ip;
     QList<QString> result_ping;
 };
 #endif // MAINWINDOW_H

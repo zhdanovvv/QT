@@ -5,10 +5,10 @@
 #include <QProgressBar>
 #include <QHostInfo>
 #include <QFile>
-#include <QDateEdit>
+#include <QDate>
 #include <QTextCursor>
 #include <QTextList>
-#include <QTimer>
+#include <QProcess>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -16,7 +16,8 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     ui->progressBar->reset();
-    ui->dateEdit->setDate(QDate::currentDate());
+    QDate dt = QDate::currentDate();
+    ui->label_data_time->setText(dt.toString(Qt::ISODate));
     connect(ui->ping_button, SIGNAL(clicked()), this, SLOT(Ping()));
     connect(ui->write_button, SIGNAL(clicked()), this, SLOT(WriteFile()));
     connect(ui->read_button, SIGNAL(clicked()), this, SLOT(ReadFile()));
@@ -36,14 +37,27 @@ void MainWindow::Add_ip_intext_edit()
    {
         qDebug() << "Valid IP Address";
         ui->lineEdit_add_ip->setText(ip.toString());
-        QString ip_adress = ui->lineEdit_add_ip->text();
+        const QString ip_adress = ui->lineEdit_add_ip->text();
         QTextCursor textEdit_cursor = ui->textEdit_ping_ip->textCursor();
         textEdit_cursor.movePosition(QTextCursor::StartOfBlock);
         ui->lineEdit_add_ip->clear();
-        ui->textEdit_ping_ip->insertPlainText(ip_adress);
-        list_ip.append(ip_adress);
-        textEdit_cursor.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor);
-        textEdit_cursor.insertBlock();
+        if(!list_ip.contains(ip_adress))
+        {
+            list_ip << ip_adress;
+            ui->textEdit_ping_ip->insertPlainText(ip_adress);
+            qDebug() << list_ip;
+            textEdit_cursor.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor);
+            textEdit_cursor.insertBlock();
+        }
+        else
+        {
+            if(!ui->textEdit_ping_ip->find(ip_adress))
+            {
+                ui->textEdit_ping_ip->insertPlainText(ip_adress);
+                textEdit_cursor.movePosition(QTextCursor::NextBlock, QTextCursor::MoveAnchor);
+                textEdit_cursor.insertBlock();
+            }
+        }
    }
    else
    {
@@ -52,28 +66,57 @@ void MainWindow::Add_ip_intext_edit()
 }
 
 void MainWindow::Ping()
-{    
-    ui->progressBar->reset();
-    QList<QString>::iterator i;
-    for(i = list_ip.begin(); i != list_ip.end(); i++)
+{
+    ui->ping_result->clear();
+    QProcess* ping = new QProcess();
+    int value_progress_bar;
+    int add_value_progress_bar;
+    bool yes = true;
+    const QString command_ping = "ping";
+    QString c_arg = "-c";
+    QString w_arg = "-w";
+    QString count_packet = "1";
+    QString ping_timeout = "10";    
+    QString result;
+    QString clipboard_text;
+    QClipboard* clipboard = QGuiApplication::clipboard();
+    QStringList new_list_ip;
+    ui->progressBar->reset();    
+    clipboard->clear();
+    ui->textEdit_ping_ip->copyAvailable(yes);
+    ui->textEdit_ping_ip->copy();
+    clipboard_text = clipboard->text();
+    new_list_ip << clipboard_text.split(QLatin1Char('\n'));
+    for(int i = 0; i < new_list_ip.size(); i++)
     {
-        QHostInfo infoName = QHostInfo::fromName(*i);
-        if(infoName.error() == QHostInfo::HostNotFound)
+        qDebug() << new_list_ip;
+        value_progress_bar = 100 / list_ip.size();
+        ping->setProgram(command_ping);
+        ping->setProcessChannelMode(QProcess::MergedChannels);
+        ping->start(command_ping, QStringList(new_list_ip.at(i)) << c_arg << count_packet << w_arg << ping_timeout);
+        if (!ping->waitForReadyRead())
         {
-            qDebug() << "Host not found";
-            qDebug() << *i;
-            ui->label_result->setText("Result ping - IP: Error - Host not found");
-            result_ping.append("Result ping - IP: Error - Host not found");
-            ui->progressBar->setValue(ui->progressBar->maximum());
+            qDebug() << "Ping failed:" << ping->errorString();
         }
-        else if(infoName.error() == QHostInfo::NoError)
+        else
         {
-            qDebug() << "IP:" << infoName.hostName() << infoName.addresses();
-            ui->label_result->setText("Result ping - Found address: IP - " + infoName.hostName());
-            result_ping.append("Result ping - Found address: IP - " + infoName.hostName());
-            ui->progressBar->setValue(ui->progressBar->maximum());
+            result = QString(ping->readAllStandardOutput());
+            if(result.isEmpty())
+            {
+                qDebug() << "there is not data";
+            }
+            else
+            {
+                qDebug() << "there is data" << result;
+                result_ping.append(result);
+                ui->ping_result->insertPlainText(result + "\n");
+                ui->progressBar->setValue(value_progress_bar);                
+            }
         }
+        ping->close();
     }
+    add_value_progress_bar = 100 - ui->progressBar->value();
+    ui->progressBar->setValue(ui->progressBar->value() + add_value_progress_bar);
 }
 
 void MainWindow::WriteFile()
