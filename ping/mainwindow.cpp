@@ -9,6 +9,12 @@
 #include <QTextCursor>
 #include <QTextList>
 #include <QProcess>
+#include <QSqlDatabase>
+#include <QSqlError>
+#include <QSqlQuery>
+#include <QSqlRecord>
+#include <QMessageBox>
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -18,14 +24,29 @@ MainWindow::MainWindow(QWidget *parent)
     ui->progressBar->reset();
     QDate dt = QDate::currentDate();
     ui->label_data_time->setText(dt.toString(Qt::ISODate));
+    db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName("ping_db");
+    if(db.open())
+    {
+        qDebug() << "Ping_db is open";
+        QSqlQuery query(db);
+        query.prepare("CREATE TABLE IF NOT EXISTS info_ping (adress_id INTEGER PRIMARY KEY AUTOINCREMENT, adress TEXT NOT NULL, request_info TEXT NOT NULL)");
+        if(query.exec())
+        {
+             qDebug() << query.lastQuery();
+        }
+    }
+    db.close();
     connect(ui->ping_button, SIGNAL(clicked()), this, SLOT(Ping()));
     connect(ui->write_button, SIGNAL(clicked()), this, SLOT(WriteFile()));
     connect(ui->read_button, SIGNAL(clicked()), this, SLOT(ReadFile()));
+    connect(ui->write_button, SIGNAL(clicked()), this, SLOT(WriteDataBase()));
+    connect(ui->read_button, SIGNAL(clicked()), this, SLOT(ReadDataBase()));
     connect(ui->add_ip_button, SIGNAL(clicked()), this, SLOT(Add_ip_intext_edit()));
 }
 
 MainWindow::~MainWindow()
-{
+{    
     delete ui;
 }
 
@@ -108,7 +129,10 @@ void MainWindow::Ping()
             else
             {
                 qDebug() << "there is data" << result;
-                result_ping.append(result);
+                if(!result_ping.contains(result))
+                {
+                    result_ping.append(result);
+                }
                 ui->ping_result->insertPlainText(result + "\n");
                 ui->progressBar->setValue(value_progress_bar);                
             }
@@ -123,7 +147,9 @@ void MainWindow::WriteFile()
 {
     QFile file("result.txt");
     if(ui->file_radiobutton->isChecked() == true)
-    {        
+    {
+        QMessageBox* message = new QMessageBox;
+        message->setIcon(QMessageBox::Information);
         if(file.exists())
         {
             qDebug() << "file exists";
@@ -136,8 +162,13 @@ void MainWindow::WriteFile()
             for(i = result_ping.begin(); i != result_ping.end(); i++)
             {
                 out << *i << "\n";
+                if(i == result_ping.end()--)
+                {
+                    message->setText("Data were written in file ");
+                }
             }
             file.close();
+            message->show();
         }
         else
         {
@@ -152,20 +183,23 @@ void MainWindow::WriteFile()
             for(i = result_ping.begin(); i != result_ping.end(); i++)
             {
                 out << *i << "\n";
+                if(i == result_ping.end()--)
+                {
+                    message->setText("Data were written in file ");
+                }
             }
             file.close();
+            message->show();
         }
-    }
-    else
-    {
-        qDebug() << "Check file button";
-    }
+    }    
 }
 
 void MainWindow::ReadFile()
 {
     if(ui->file_radiobutton->isChecked() == true)
     {
+        QMessageBox* message = new QMessageBox;
+        message->setIcon(QMessageBox::Information);
         QFile file("result.txt");
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         {
@@ -176,12 +210,101 @@ void MainWindow::ReadFile()
         while (!in.atEnd())
         {
             line = in.readLine();
-            qDebug() << line;
+            message->setText(message->text() + line + "\n");
+            message->show();
+            //qDebug() << line;
         }
         file.close();
-    }
-    else
+    } 
+}
+
+void MainWindow::WriteDataBase()
+{
+    if(ui->base_radiobutton->isChecked() == true)
     {
-        qDebug() << "Check file button";
+        QMessageBox* message = new QMessageBox;
+        message->setIcon(QMessageBox::Information);
+        if(db.open())
+        {
+            QSqlQuery insert(db);
+            for(int i = 0; i < list_ip.size(); i++)
+            {
+                insert.prepare("INSERT INTO info_ping (adress ,request_info) VALUES (:adress, :request_info)");
+                insert.bindValue(":adress", list_ip[i]);
+                insert.bindValue(":request_info", "");
+                if(insert.exec())
+                {
+                     qDebug() << insert.lastQuery();
+                     if(i == list_ip.size() - 1)
+                     {
+                        message->setText("Data were written in database ");
+                     }
+                }
+                else
+                {
+                    qDebug() << insert.lastError();
+                }
+            }
+            for(int i = 0; i < result_ping.size(); i++)
+            {
+                insert.prepare("INSERT INTO info_ping (adress, request_info) VALUES (:adress, :request_info)");
+                insert.bindValue(":request_info", result_ping[i]);
+                insert.bindValue(":adress", "");
+                if(insert.exec())
+                {
+                     qDebug() << insert.lastQuery();
+                     if(i == result_ping.size() - 1)
+                     {
+                        message->setText("Data were written in database");
+                     }
+                }
+                else
+                {
+                    qDebug() << insert.lastError();
+                }
+            }
+            db.close();
+        }
+        else if(!db.open())
+        {
+            QString ping_db_error = db.lastError().text();
+            qDebug() << ping_db_error;
+        }
+        message->show();
     }
 }
+
+void MainWindow::ReadDataBase()
+{    
+    if(ui->base_radiobutton->isChecked() == true)
+    {
+        QMessageBox* message = new QMessageBox;
+        message->setIcon(QMessageBox::Information);
+        if(db.open())
+        {
+            QStringList tables_ping_db = db.tables();
+            qDebug() << "Ping_db is open" << "\n" << tables_ping_db;
+            QSqlQuery select(db);
+            select.prepare("SELECT request_info FROM info_ping");
+            if(select.exec())
+            {
+                 qDebug() << select.lastQuery();
+            }
+            while (select.next())
+            {                
+                //qDebug() << select.value("request_info").toString() << "\n";
+                message->setText(message->text() + select.value("request_info").toString() + "\n");
+                message->show();
+            }
+            db.close();
+        }
+        else if(!db.open())
+        {
+            QString ping_db_error = db.lastError().text();
+            //qDebug() << ping_db_error;
+            message->setText(ping_db_error);
+            message->show();
+        }
+    }   
+}
+

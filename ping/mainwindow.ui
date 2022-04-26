@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>993</width>
-    <height>920</height>
+    <height>1074</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -266,8 +266,8 @@
      <y>104</y>
     </hint>
     <hint type="destinationlabel">
-     <x>67</x>
-     <y>741</y>
+     <x>86</x>
+     <y>805</y>
     </hint>
    </hints>
   </connection>

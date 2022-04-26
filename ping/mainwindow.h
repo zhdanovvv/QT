@@ -6,6 +6,7 @@
 #include <QHostInfo>
 #include <QList>
 #include <QStringList>
+#include <QSqlDatabase>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -24,10 +25,13 @@ private slots:
     void WriteFile();
     void ReadFile();
     void Add_ip_intext_edit();
+    void WriteDataBase();
+    void ReadDataBase();   
 
 private:
     Ui::MainWindow *ui;
+    QSqlDatabase db;
     QStringList list_ip;
-    QList<QString> result_ping;
+    QStringList result_ping;
 };
 #endif // MAINWINDOW_H
