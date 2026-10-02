@@ -7,7 +7,6 @@ void SystemClock_Config()
         Error_Handler();
 
     RCC_OscInitTypeDef RCC_OscInitStruct;
-    /* Enable HSE Oscillator and activate PLL with HSE as source */
     RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
     RCC_OscInitStruct.HSEState = RCC_HSE_ON;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
@@ -19,8 +18,6 @@ void SystemClock_Config()
     if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
         Error_Handler();
 
-    /* Select PLL as system clock source and configure the HCLK, PCLK1 and PCLK2 clocks dividers
-    */
     RCC_ClkInitTypeDef RCC_ClkInitStruct;
     RCC_ClkInitStruct.ClockType = (RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_HCLK |
     RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2);
