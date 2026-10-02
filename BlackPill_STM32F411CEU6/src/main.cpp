@@ -11,7 +11,7 @@ int main()
 
     USART_HandleTypeDef uartHandle = UartInit();
 
-    const char* message = "Hello USART\r\n";
+    const char message[] = "Hello USART\r\n";
 
     while (1)
     {
