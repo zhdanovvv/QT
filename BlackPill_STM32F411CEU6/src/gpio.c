@@ -37,7 +37,7 @@ void GpioInitPB6PB7()
     gpioInitPB7.Mode = GPIO_MODE_AF_PP;
     gpioInitPB7.Pull = GPIO_PULLUP;
     gpioInitPB7.Speed = GPIO_SPEED_HIGH;
-    gpioInitPB6.Alternate = GPIO_AF7_USART1;
+    gpioInitPB7.Alternate = GPIO_AF7_USART1;
     HAL_GPIO_Init(GPIOB, &gpioInitPB7);
 
     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_6, GPIO_PIN_RESET);
