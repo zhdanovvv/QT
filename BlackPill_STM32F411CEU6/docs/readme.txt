@@ -34,3 +34,8 @@ st-flash write BlackPill.bin 0x08000000
 
 apt install picocom
 picocom /dev/ttyUSB0 -b 115200
+
+Уточнение по архиву gcc-arm-none-eabi-10.3-2021.10.tar.xz:
+arm-none-eabi-gdb из архива для подключения в qtcreator - нерабочий, поэтому лучше использовать gdb-multiarch вместе с компиляторами из тулчейна
+Команда установки:
+apt install gdb-multiarch
